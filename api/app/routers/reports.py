@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, case, and_, extract
+from sqlalchemy import func, case, and_, extract, String
 
 from app.database import get_db
 from app.models import Transaction, Category, Account
@@ -138,8 +138,6 @@ def get_income_vs_expenses(
         period_sort = period_expr
 
     # Query with income/expense aggregation
-    from sqlalchemy import String
-
     if granularity == "weekly":
         period_expr = func.concat(
             func.cast(extract('year', Transaction.transaction_date), String),
@@ -222,8 +220,6 @@ def get_spending_trends(
             date_from = date_to - timedelta(weeks=12)
         else:
             date_from = date_to - timedelta(days=365)
-
-    from sqlalchemy import String
 
     if granularity == "weekly":
         period_expr = func.concat(
