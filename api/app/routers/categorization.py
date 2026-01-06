@@ -660,44 +660,46 @@ def ml_auto_categorize(
 def get_categorization_stats(db: Session = Depends(get_db)):
     """
     Get categorization statistics for the dashboard.
-    
+
     Returns counts of:
     - Uncategorized (pending)
     - Auto-categorized (needs review)
     - User-confirmed (locked)
     """
-    from sqlalchemy import func
-    
-    # Total transactions
-    total = db.query(func.count(Transaction.id)).scalar()
-    
-    # User confirmed (locked)
-    user_confirmed = db.query(func.count(Transaction.id)).filter(
-        Transaction.is_user_confirmed == True
-    ).scalar()
-    
-    # Auto-categorized (has category but not user confirmed)
-    auto_categorized = db.query(func.count(Transaction.id)).filter(
-        Transaction.is_user_confirmed == False,
-        Transaction.category_id.isnot(None)
-    ).scalar()
-    
-    # Uncategorized (no category)
-    uncategorized = db.query(func.count(Transaction.id)).filter(
-        Transaction.category_id.is_(None)
-    ).scalar()
-    
-    # Unclassified (no personal/business classification)
-    unclassified = db.query(func.count(Transaction.id)).filter(
-        Transaction.classification == TransactionClassification.UNCLASSIFIED
-    ).scalar()
-    
-    # Personal transactions needing category
-    personal_uncategorized = db.query(func.count(Transaction.id)).filter(
-        Transaction.classification == TransactionClassification.PERSONAL,
-        Transaction.category_id.is_(None)
-    ).scalar()
-    
+    from sqlalchemy import func, case, literal
+
+    # OPTIMIZED: Single query with CASE aggregations instead of 6 separate queries
+    stats = db.query(
+        func.count(Transaction.id).label('total'),
+        func.sum(case(
+            (Transaction.is_user_confirmed == True, 1),
+            else_=literal(0)
+        )).label('user_confirmed'),
+        func.sum(case(
+            ((Transaction.is_user_confirmed == False) & (Transaction.category_id.isnot(None)), 1),
+            else_=literal(0)
+        )).label('auto_categorized'),
+        func.sum(case(
+            (Transaction.category_id.is_(None), 1),
+            else_=literal(0)
+        )).label('uncategorized'),
+        func.sum(case(
+            (Transaction.classification == TransactionClassification.UNCLASSIFIED, 1),
+            else_=literal(0)
+        )).label('unclassified'),
+        func.sum(case(
+            ((Transaction.classification == TransactionClassification.PERSONAL) & (Transaction.category_id.is_(None)), 1),
+            else_=literal(0)
+        )).label('personal_uncategorized')
+    ).first()
+
+    total = stats.total or 0
+    user_confirmed = int(stats.user_confirmed or 0)
+    auto_categorized = int(stats.auto_categorized or 0)
+    uncategorized = int(stats.uncategorized or 0)
+    unclassified = int(stats.unclassified or 0)
+    personal_uncategorized = int(stats.personal_uncategorized or 0)
+
     return {
         "total": total,
         "user_confirmed": user_confirmed,
