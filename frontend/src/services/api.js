@@ -12,14 +12,38 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Add auth interceptor to handle 401 responses
+// Retry configuration for handling serverless cold starts
+const RETRY_STATUSES = [502, 503, 504]; // Gateway errors from cold starts
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 1000; // 1 second
+
+// Helper to delay execution
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Add retry interceptor for cold start errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+
+    // Handle auth errors
     if (error.response?.status === 401) {
-      // HTTP Basic Auth will trigger browser's login prompt
       console.warn('Authentication required');
+      return Promise.reject(error);
     }
+
+    // Retry on cold start errors (502, 503, 504)
+    if (error.response && RETRY_STATUSES.includes(error.response.status)) {
+      config.__retryCount = config.__retryCount || 0;
+
+      if (config.__retryCount < MAX_RETRIES) {
+        config.__retryCount += 1;
+        console.log(`Retrying request (${config.__retryCount}/${MAX_RETRIES}) after ${error.response.status}...`);
+        await delay(RETRY_DELAY * config.__retryCount); // Exponential backoff
+        return api(config);
+      }
+    }
+
     return Promise.reject(error);
   }
 );

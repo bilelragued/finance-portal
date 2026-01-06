@@ -49,6 +49,20 @@
       }
     },
     {
+      "src": "/api/categorization/stats",
+      "dest": "/api/index.py",
+      "headers": {
+        "Cache-Control": "public, max-age=30, stale-while-revalidate=60"
+      }
+    },
+    {
+      "src": "/api/transactions/stats/summary",
+      "dest": "/api/index.py",
+      "headers": {
+        "Cache-Control": "public, max-age=30, stale-while-revalidate=60"
+      }
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
