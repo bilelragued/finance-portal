@@ -267,44 +267,196 @@ def get_categorization_suggestions(
 ):
     """
     Get uncategorized transactions with suggestions.
-    
+
     By default uses fast rule-based matching. Set use_llm=true for AI suggestions.
     """
-    categorizer = TransactionCategorizer(db)
-    transactions = categorizer.get_uncategorized_transactions(
-        account_id=account_id,
-        limit=limit
+    from sqlalchemy.orm import joinedload
+    import re
+
+    # OPTIMIZED: Single query with eager loading of account relationship
+    query = db.query(Transaction).options(
+        joinedload(Transaction.account)
+    ).filter(
+        Transaction.is_reviewed == False
     )
-    
+
+    if account_id:
+        query = query.filter(Transaction.account_id == account_id)
+
+    transactions = query.order_by(
+        Transaction.transaction_date.desc()
+    ).limit(limit).all()
+
+    if use_llm:
+        # Slow path: use LLM for each transaction
+        categorizer = TransactionCategorizer(db)
+        results = []
+        for trans in transactions:
+            suggestion = categorizer.categorize_transaction(trans)
+            results.append(_build_suggestion_item(trans, suggestion))
+        return {"total": len(results), "items": results}
+
+    # FAST PATH: Batch process all transactions with pre-loaded data
+    # Pre-load all rules ONCE
+    rules = db.query(MerchantRule).order_by(MerchantRule.confidence.desc()).all()
+
+    # Pre-load categories for name lookup
+    categories = {c.id: c.name for c in db.query(Category).all()}
+
+    # Build account type cache from eager-loaded relationships
+    account_types = {}
+    for trans in transactions:
+        if trans.account and trans.account_id not in account_types:
+            account_types[trans.account_id] = trans.account.account_type
+
     results = []
     for trans in transactions:
-        if use_llm:
-            suggestion = categorizer.categorize_transaction(trans)
-        else:
-            # Fast mode: rules only, no LLM call
-            suggestion = categorizer.categorize_with_rules_only(trans)
-        results.append({
-            "transaction": {
-                "id": trans.id,
-                "date": trans.transaction_date.isoformat(),
-                "processed_date": trans.processed_date.isoformat() if trans.processed_date else None,
-                "details": trans.details,
-                "type": trans.transaction_type,
-                "amount": trans.amount,
-                "balance": trans.balance,
-                "particulars": trans.particulars,
-                "code": trans.code,
-                "reference": trans.reference,
-                "to_from_account": trans.to_from_account,
-                "card_number_last4": trans.card_number_last4,
-                "account_id": trans.account_id
-            },
-            "suggestion": suggestion
-        })
-    
+        suggestion = _fast_categorize(trans, rules, categories, account_types)
+        results.append(_build_suggestion_item(trans, suggestion))
+
     return {
         "total": len(results),
         "items": results
+    }
+
+
+def _build_suggestion_item(trans: Transaction, suggestion: dict) -> dict:
+    """Build a suggestion response item."""
+    return {
+        "transaction": {
+            "id": trans.id,
+            "date": trans.transaction_date.isoformat(),
+            "processed_date": trans.processed_date.isoformat() if trans.processed_date else None,
+            "details": trans.details,
+            "type": trans.transaction_type,
+            "amount": trans.amount,
+            "balance": trans.balance,
+            "particulars": trans.particulars,
+            "code": trans.code,
+            "reference": trans.reference,
+            "to_from_account": trans.to_from_account,
+            "card_number_last4": trans.card_number_last4,
+            "account_id": trans.account_id
+        },
+        "suggestion": suggestion
+    }
+
+
+def _fast_categorize(
+    trans: Transaction,
+    rules: list,
+    categories: dict,
+    account_types: dict
+) -> dict:
+    """Fast categorization without database queries."""
+    import re
+    from app.models import AccountType
+
+    is_business = account_types.get(trans.account_id) == AccountType.BUSINESS
+    merchant = (trans.details or "").lower()
+
+    # Try to match a rule
+    for rule in rules:
+        pattern = rule.merchant_pattern.lower()
+
+        # Pattern matching
+        if rule.match_type == "exact" and merchant != pattern:
+            continue
+        elif rule.match_type == "contains" and pattern not in merchant:
+            continue
+        elif rule.match_type == "startswith" and not merchant.startswith(pattern):
+            continue
+        elif rule.match_type == "regex":
+            if not re.search(pattern, merchant, re.IGNORECASE):
+                continue
+        elif rule.match_type not in ("exact", "contains", "startswith", "regex") and pattern not in merchant:
+            continue
+
+        # Account type check
+        if rule.account_type and account_types.get(trans.account_id) != rule.account_type:
+            continue
+
+        # Amount checks
+        if rule.min_amount is not None and abs(trans.amount) < rule.min_amount:
+            continue
+        if rule.max_amount is not None and abs(trans.amount) > rule.max_amount:
+            continue
+
+        # Day of week check
+        if rule.day_of_week:
+            trans_day = trans.transaction_date.strftime("%A").lower()
+            if rule.day_of_week == "weekend" and trans_day not in ["saturday", "sunday"]:
+                continue
+            elif rule.day_of_week == "weekday" and trans_day in ["saturday", "sunday"]:
+                continue
+            elif rule.day_of_week not in ["weekend", "weekday"] and trans_day != rule.day_of_week.lower():
+                continue
+
+        # Rule matched!
+        return {
+            "classification": rule.classification.value,
+            "category_id": rule.category_id,
+            "category_name": categories.get(rule.category_id),
+            "confidence": rule.confidence,
+            "source": "rule",
+            "explanation": f"Matched rule: '{rule.merchant_pattern}'"
+        }
+
+    # No rule matched - use basic keyword matching
+    return _basic_keyword_match(trans, is_business, categories)
+
+
+def _basic_keyword_match(trans: Transaction, is_business: bool, categories: dict) -> dict:
+    """Fast basic keyword matching without database queries."""
+    details = (trans.details or "").lower()
+    trans_type = (trans.transaction_type or "").lower()
+    classification = "business" if is_business else "personal"
+
+    # Check for income first
+    if trans_type in ["direct credit", "payment received", "salary", "wages"]:
+        return {
+            "classification": "personal",
+            "category_id": None,
+            "category_name": "Salary",
+            "confidence": 0.7,
+            "source": "basic",
+            "explanation": "Income transaction - needs category selection"
+        }
+
+    # Basic keyword rules
+    keyword_rules = [
+        (["countdown", "new world", "pak n save", "paknsave", "supermarket"], "Groceries", False),
+        (["restaurant", "cafe", "coffee", "mcdonald", "burger", "pizza", "sushi"], "Food & Dining", False),
+        (["bp", "z energy", "mobil", "caltex", "fuel", "petrol", "uber", "taxi"], "Transport", False),
+        (["bunnings", "mitre 10", "mitre10", "placemakers"], "Home & Garden", True),
+        (["netflix", "spotify", "disney", "amazon prime", "youtube"], "Entertainment", True),
+        (["amazon", "ebay", "trademe", "kmart", "the warehouse"], "Shopping", False),
+        (["bank fee", "account fee", "overdraft"], "Bank Fees", False),
+    ]
+
+    for keywords, cat_name, force_personal in keyword_rules:
+        if any(kw in details for kw in keywords):
+            if force_personal and is_business:
+                classification = "personal"
+            # Find category ID by name
+            cat_id = next((cid for cid, cname in categories.items() if cname == cat_name), None)
+            return {
+                "classification": classification,
+                "category_id": cat_id,
+                "category_name": cat_name,
+                "confidence": 0.5,
+                "source": "basic",
+                "explanation": f"Matched keyword - suggest: {cat_name}"
+            }
+
+    # No match
+    return {
+        "classification": classification,
+        "category_id": None,
+        "category_name": None,
+        "confidence": 0.0,
+        "source": "none",
+        "explanation": "No matching rules. Click 'Get AI Suggestion' for smart categorization."
     }
 
 
