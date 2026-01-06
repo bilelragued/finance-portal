@@ -87,45 +87,40 @@ def list_transactions(
     """
     List transactions with filtering and pagination.
     """
-    query = db.query(Transaction).options(
-        joinedload(Transaction.account),
-        joinedload(Transaction.category)
-    )
-    
-    # Apply filters
+    # Build filters list to apply to both count and data queries
+    filters = []
+
     if account_id:
-        query = query.filter(Transaction.account_id == account_id)
-    
+        filters.append(Transaction.account_id == account_id)
+
     if category_id:
         if category_id.lower() == "null":
-            # Filter for uncategorized transactions
-            query = query.filter(Transaction.category_id == None)
+            filters.append(Transaction.category_id == None)
         else:
-            # Filter for specific category
             try:
-                query = query.filter(Transaction.category_id == int(category_id))
+                filters.append(Transaction.category_id == int(category_id))
             except ValueError:
-                pass  # Invalid category_id, ignore filter
-    
+                pass
+
     if classification:
         try:
             class_enum = TransactionClassification(classification.lower())
-            query = query.filter(Transaction.classification == class_enum)
+            filters.append(Transaction.classification == class_enum)
         except ValueError:
-            pass  # Invalid classification, ignore filter
-    
+            pass
+
     if is_reviewed is not None:
-        query = query.filter(Transaction.is_reviewed == is_reviewed)
-    
+        filters.append(Transaction.is_reviewed == is_reviewed)
+
     if date_from:
-        query = query.filter(Transaction.transaction_date >= date_from)
-    
+        filters.append(Transaction.transaction_date >= date_from)
+
     if date_to:
-        query = query.filter(Transaction.transaction_date <= date_to)
-    
+        filters.append(Transaction.transaction_date <= date_to)
+
     if search:
         search_term = f"%{search}%"
-        query = query.filter(
+        filters.append(
             or_(
                 Transaction.details.ilike(search_term),
                 Transaction.particulars.ilike(search_term),
@@ -133,26 +128,29 @@ def list_transactions(
                 Transaction.reference.ilike(search_term)
             )
         )
-    
+
     if min_amount is not None:
-        query = query.filter(Transaction.amount >= min_amount)
-    
+        filters.append(Transaction.amount >= min_amount)
+
     if max_amount is not None:
-        query = query.filter(Transaction.amount <= max_amount)
-    
-    # Get total count
-    total = query.count()
-    
-    # Apply pagination
+        filters.append(Transaction.amount <= max_amount)
+
+    # Get total count with lightweight query (no joins)
+    total = db.query(func.count(Transaction.id)).filter(*filters).scalar()
+
+    # Get paginated data with eager loading
     offset = (page - 1) * page_size
-    transactions = query.order_by(
+    transactions = db.query(Transaction).options(
+        joinedload(Transaction.account),
+        joinedload(Transaction.category)
+    ).filter(*filters).order_by(
         Transaction.transaction_date.desc(),
         Transaction.id.desc()
     ).offset(offset).limit(page_size).all()
-    
+
     # Calculate total pages
     total_pages = (total + page_size - 1) // page_size
-    
+
     return TransactionListResponse(
         transactions=[transaction_to_response(t) for t in transactions],
         total=total,
@@ -339,63 +337,47 @@ def get_transaction_stats(
     date_to: Optional[date] = None,
     db: Session = Depends(get_db)
 ):
-    """Get transaction statistics."""
-    query = db.query(Transaction)
-    
+    """Get transaction statistics - optimized single query."""
+    from sqlalchemy import case
+
+    # Build base filter conditions
+    filters = []
     if account_id:
-        query = query.filter(Transaction.account_id == account_id)
-    
+        filters.append(Transaction.account_id == account_id)
     if date_from:
-        query = query.filter(Transaction.transaction_date >= date_from)
-    
+        filters.append(Transaction.transaction_date >= date_from)
     if date_to:
-        query = query.filter(Transaction.transaction_date <= date_to)
-    
-    total_count = query.count()
-    
-    # Income (positive amounts)
-    income = query.filter(Transaction.amount > 0).with_entities(
-        func.sum(Transaction.amount)
-    ).scalar() or 0.0
-    
-    # Expenses (negative amounts)
-    expenses = query.filter(Transaction.amount < 0).with_entities(
-        func.sum(Transaction.amount)
-    ).scalar() or 0.0
-    
-    # Classification counts
-    unclassified_count = query.filter(
-        Transaction.classification == TransactionClassification.UNCLASSIFIED
-    ).count()
-    
-    personal_count = query.filter(
-        Transaction.classification == TransactionClassification.PERSONAL
-    ).count()
-    
-    business_count = query.filter(
-        Transaction.classification == TransactionClassification.BUSINESS
-    ).count()
-    
-    # Unreviewed count
-    unreviewed_count = query.filter(Transaction.is_reviewed == False).count()
-    
-    # Uncategorized count (personal transactions without category)
-    uncategorized_count = query.filter(
-        Transaction.classification == TransactionClassification.PERSONAL,
-        Transaction.category_id == None
-    ).count()
-    
+        filters.append(Transaction.transaction_date <= date_to)
+
+    # Single query with all aggregations using CASE statements
+    stats = db.query(
+        func.count(Transaction.id).label('total_count'),
+        func.sum(case((Transaction.amount > 0, Transaction.amount), else_=0)).label('income'),
+        func.sum(case((Transaction.amount < 0, Transaction.amount), else_=0)).label('expenses'),
+        func.sum(case((Transaction.classification == TransactionClassification.UNCLASSIFIED, 1), else_=0)).label('unclassified'),
+        func.sum(case((Transaction.classification == TransactionClassification.PERSONAL, 1), else_=0)).label('personal'),
+        func.sum(case((Transaction.classification == TransactionClassification.BUSINESS, 1), else_=0)).label('business'),
+        func.sum(case((Transaction.is_reviewed == False, 1), else_=0)).label('unreviewed'),
+        func.sum(case(
+            (and_(
+                Transaction.classification == TransactionClassification.PERSONAL,
+                Transaction.category_id == None
+            ), 1),
+            else_=0
+        )).label('uncategorized')
+    ).filter(*filters).first()
+
     return {
-        "total_transactions": total_count,
-        "total_income": float(income),
-        "total_expenses": float(expenses),
-        "net_cashflow": float(income + expenses),
+        "total_transactions": stats.total_count or 0,
+        "total_income": float(stats.income or 0),
+        "total_expenses": float(stats.expenses or 0),
+        "net_cashflow": float((stats.income or 0) + (stats.expenses or 0)),
         "classification": {
-            "unclassified": unclassified_count,
-            "personal": personal_count,
-            "business": business_count
+            "unclassified": stats.unclassified or 0,
+            "personal": stats.personal or 0,
+            "business": stats.business or 0
         },
-        "unreviewed_count": unreviewed_count,
-        "uncategorized_count": uncategorized_count
+        "unreviewed_count": stats.unreviewed or 0,
+        "uncategorized_count": stats.uncategorized or 0
     }
 

@@ -166,18 +166,26 @@ async def upload_preview(
         if existing_account:
             debug_log(f"Checking for duplicates against existing account...", "PREVIEW")
             dup_start = time.time()
-            # Check each transaction for duplicates
+
+            # Build a set of existing transaction signatures for O(1) lookup
+            existing_signatures = set(
+                db.query(
+                    Transaction.transaction_date,
+                    Transaction.amount,
+                    Transaction.details
+                ).filter(
+                    Transaction.account_id == existing_account.id
+                ).all()
+            )
+
+            # Check each transaction against the set (no DB queries in loop)
             for trans in transactions:
-                exists = db.query(Transaction).filter(
-                    and_(
-                        Transaction.account_id == existing_account.id,
-                        Transaction.transaction_date == trans["transaction_date"],
-                        Transaction.amount == trans["amount"],
-                        Transaction.details == trans.get("details")
-                    )
-                ).first()
-                
-                if exists:
+                signature = (
+                    trans["transaction_date"],
+                    trans["amount"],
+                    trans.get("details")
+                )
+                if signature in existing_signatures:
                     duplicate_count += 1
 
             new_count = len(transactions) - duplicate_count
@@ -359,27 +367,33 @@ async def confirm_upload(
         new_count = 0
         duplicate_count = 0
         import_start = time.time()
-        debug_log(f"Starting transaction import loop for {len(transactions)} transactions...", "CONFIRM")
+        debug_log(f"Starting transaction import for {len(transactions)} transactions...", "CONFIRM")
 
-        for i, trans_data in enumerate(transactions):
-            if i % 50 == 0:
-                elapsed = time.time() - import_start
-                rate = (i + 1) / elapsed if elapsed > 0 else 0
-                debug_log(f"Processing transaction {i+1}/{len(transactions)} ({rate:.1f}/sec)...", "CONFIRM")
-            # Check for duplicate
-            existing = db.query(Transaction).filter(
-                and_(
-                    Transaction.account_id == account.id,
-                    Transaction.transaction_date == trans_data["transaction_date"],
-                    Transaction.amount == trans_data["amount"],
-                    Transaction.details == trans_data.get("details")
-                )
-            ).first()
-            
-            if existing:
+        # Build a set of existing transaction signatures for O(1) lookup (single query)
+        existing_signatures = set(
+            db.query(
+                Transaction.transaction_date,
+                Transaction.amount,
+                Transaction.details
+            ).filter(
+                Transaction.account_id == account.id
+            ).all()
+        )
+        debug_log(f"Loaded {len(existing_signatures)} existing signatures for duplicate check", "CONFIRM")
+
+        # Process all transactions without DB queries in loop
+        new_transactions = []
+        for trans_data in transactions:
+            signature = (
+                trans_data["transaction_date"],
+                trans_data["amount"],
+                trans_data.get("details")
+            )
+
+            if signature in existing_signatures:
                 duplicate_count += 1
                 continue
-            
+
             # Create new transaction
             trans = Transaction(
                 account_id=account.id,
@@ -399,12 +413,15 @@ async def confirm_upload(
                 classification=default_classification,
                 import_batch_id=batch_id
             )
-            
-            db.add(trans)
+            new_transactions.append(trans)
             new_count += 1
 
+        # Bulk add all new transactions
+        if new_transactions:
+            db.add_all(new_transactions)
+
         import_elapsed = time.time() - import_start
-        debug_log(f"Import loop complete in {import_elapsed:.2f}s: {new_count} new, {duplicate_count} duplicates", "CONFIRM")
+        debug_log(f"Import complete in {import_elapsed:.2f}s: {new_count} new, {duplicate_count} duplicates", "CONFIRM")
 
         # Create import log
         debug_log(f"Creating import log...", "CONFIRM")

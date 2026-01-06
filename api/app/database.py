@@ -32,8 +32,9 @@ pool_settings = {
 # Add connection pool settings for PostgreSQL (not supported by SQLite)
 if not is_sqlite:
     pool_settings.update({
-        "pool_size": 5,  # Maintain 5 connections in pool
-        "max_overflow": 10,  # Allow up to 10 extra temporary connections
+        "pool_size": 10,  # Maintain 10 connections in pool
+        "max_overflow": 20,  # Allow up to 20 extra temporary connections
+        "pool_timeout": 30,  # Wait up to 30 seconds for a connection
     })
 
 engine = create_engine(
