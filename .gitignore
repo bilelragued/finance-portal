@@ -70,3 +70,4 @@ backend/data/models/
 # Temporary
 tmp/
 temp/
+*.tmp.*

@@ -1,14 +1,15 @@
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Upload, 
-  Receipt, 
+import {
+  LayoutDashboard,
+  Upload,
+  Receipt,
   Wallet,
   Settings,
   TrendingUp,
   Brain,
   BookOpen,
-  Tags
+  Tags,
+  BarChart3
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -20,6 +21,7 @@ import AccountsPage from './pages/Accounts';
 import ReviewPage from './pages/Review';
 import RulesPage from './pages/Rules';
 import CategoriesPage from './pages/Categories';
+import ReportsPage from './pages/Reports';
 
 function App() {
   const location = useLocation();
@@ -29,6 +31,7 @@ function App() {
     { path: '/upload', icon: Upload, label: 'Upload' },
     { path: '/review', icon: Brain, label: 'Smart Review' },
     { path: '/transactions', icon: Receipt, label: 'Transactions' },
+    { path: '/reports', icon: BarChart3, label: 'Reports' },
     { path: '/accounts', icon: Wallet, label: 'Accounts' },
     { path: '/categories', icon: Tags, label: 'Categories' },
     { path: '/rules', icon: BookOpen, label: 'Learned Rules' },
@@ -95,6 +98,7 @@ function App() {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/rules" element={<RulesPage />} />

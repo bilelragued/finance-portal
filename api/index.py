@@ -1,17 +1,23 @@
 """
 Vercel serverless function entry point.
-This wraps the FastAPI app for Vercel's serverless environment.
+Exports FastAPI app directly for Vercel's ASGI runtime.
 """
 import sys
-import os
 from pathlib import Path
 
-# Add backend directory to Python path
-backend_dir = Path(__file__).parent.parent / "backend"
-sys.path.insert(0, str(backend_dir))
+# Add api directory to Python path so 'app' module can be found
+api_dir = Path(__file__).parent
+if str(api_dir) not in sys.path:
+    sys.path.insert(0, str(api_dir))
 
-from mangum import Mangum
 from app.main import app
+from app.database import init_db
 
-# Mangum handler for Vercel
-handler = Mangum(app, lifespan="off")
+# Initialize database tables
+try:
+    init_db()
+except Exception as e:
+    print(f"Database initialization note: {e}")
+
+# Export app for Vercel ASGI runtime
+# The app variable is imported and exported for Vercel to use

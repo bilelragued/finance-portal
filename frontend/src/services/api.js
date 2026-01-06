@@ -152,6 +152,14 @@ export const categorizationApi = {
     }),
 };
 
+// Reports API
+export const reportsApi = {
+  getSpendingByCategory: (params = {}) => api.get('/reports/spending-by-category', { params }),
+  getIncomeVsExpenses: (params = {}) => api.get('/reports/income-vs-expenses', { params }),
+  getSpendingTrends: (params = {}) => api.get('/reports/spending-trends', { params }),
+  getSummary: (params = {}) => api.get('/reports/summary', { params }),
+};
+
 // Health check
 export const healthCheck = () => api.get('/health');
 
