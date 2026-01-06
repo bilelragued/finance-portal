@@ -1,7 +1,7 @@
 """Account management endpoints."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, case
 from typing import List
 
 from app.database import get_db
@@ -13,28 +13,28 @@ router = APIRouter(prefix="/accounts", tags=["accounts"])
 
 @router.get("/", response_model=List[AccountResponse])
 def list_accounts(db: Session = Depends(get_db)):
-    """List all accounts with transaction counts."""
-    accounts = db.query(Account).all()
-    
-    result = []
-    for account in accounts:
-        trans_count = db.query(func.count(Transaction.id)).filter(
-            Transaction.account_id == account.id
-        ).scalar()
-        
-        account_dict = {
-            "id": account.id,
-            "account_number": account.account_number,
-            "name": account.name,
-            "owner": account.owner,
-            "account_type": account.account_type.value,
-            "created_at": account.created_at,
-            "updated_at": account.updated_at,
-            "transaction_count": trans_count
-        }
-        result.append(AccountResponse(**account_dict))
-    
-    return result
+    """List all accounts with transaction counts - optimized single query."""
+    # Single query with LEFT JOIN and GROUP BY to get all accounts with counts
+    accounts_with_counts = db.query(
+        Account,
+        func.count(Transaction.id).label('transaction_count')
+    ).outerjoin(
+        Transaction, Account.id == Transaction.account_id
+    ).group_by(Account.id).all()
+
+    return [
+        AccountResponse(
+            id=account.id,
+            account_number=account.account_number,
+            name=account.name,
+            owner=account.owner,
+            account_type=account.account_type.value,
+            created_at=account.created_at,
+            updated_at=account.updated_at,
+            transaction_count=trans_count
+        )
+        for account, trans_count in accounts_with_counts
+    ]
 
 
 @router.post("/", response_model=AccountResponse)
@@ -158,33 +158,34 @@ def delete_account(account_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{account_id}/summary", response_model=AccountSummary)
 def get_account_summary(account_id: int, db: Session = Depends(get_db)):
-    """Get account summary with statistics."""
+    """Get account summary with statistics - optimized to 2 queries."""
     account = db.query(Account).filter(Account.id == account_id).first()
-    
+
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    
-    # Get transaction stats
-    trans_count = db.query(func.count(Transaction.id)).filter(
-        Transaction.account_id == account.id
-    ).scalar()
-    
-    # Get latest transaction
-    latest_trans = db.query(Transaction).filter(
-        Transaction.account_id == account.id
-    ).order_by(Transaction.transaction_date.desc()).first()
-    
-    # Calculate totals
-    income = db.query(func.sum(Transaction.amount)).filter(
-        Transaction.account_id == account.id,
-        Transaction.amount > 0
-    ).scalar() or 0.0
-    
-    expenses = db.query(func.sum(Transaction.amount)).filter(
-        Transaction.account_id == account.id,
-        Transaction.amount < 0
-    ).scalar() or 0.0
-    
+
+    # Single aggregation query for all stats
+    stats = db.query(
+        func.count(Transaction.id).label('trans_count'),
+        func.sum(case((Transaction.amount > 0, Transaction.amount), else_=0)).label('income'),
+        func.sum(case((Transaction.amount < 0, Transaction.amount), else_=0)).label('expenses'),
+        func.max(Transaction.transaction_date).label('latest_date')
+    ).filter(Transaction.account_id == account.id).first()
+
+    trans_count = stats.trans_count or 0
+    income = float(stats.income or 0)
+    expenses = float(stats.expenses or 0)
+
+    # Get balance from latest transaction (only if there are transactions)
+    latest_balance = None
+    latest_date = stats.latest_date
+    if latest_date:
+        latest_trans = db.query(Transaction.balance).filter(
+            Transaction.account_id == account.id,
+            Transaction.transaction_date == latest_date
+        ).order_by(Transaction.id.desc()).first()
+        latest_balance = latest_trans.balance if latest_trans else None
+
     return AccountSummary(
         account=AccountResponse(
             id=account.id,
@@ -197,10 +198,10 @@ def get_account_summary(account_id: int, db: Session = Depends(get_db)):
             transaction_count=trans_count
         ),
         total_transactions=trans_count,
-        latest_transaction_date=latest_trans.transaction_date if latest_trans else None,
-        current_balance=latest_trans.balance if latest_trans else None,
-        total_income=float(income),
-        total_expenses=float(expenses)
+        latest_transaction_date=latest_date,
+        current_balance=latest_balance,
+        total_income=income,
+        total_expenses=expenses
     )
 
 

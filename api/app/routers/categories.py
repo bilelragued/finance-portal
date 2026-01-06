@@ -296,20 +296,20 @@ def seed_categories(db: Session = Depends(get_db)):
 
 @router.get("/stats/usage")
 def get_category_usage(db: Session = Depends(get_db)):
-    """Get category usage statistics."""
-    categories = db.query(Category).all()
-    
-    result = []
-    for cat in categories:
-        trans_count = db.query(func.count(Transaction.id)).filter(
-            Transaction.category_id == cat.id
-        ).scalar()
-        
-        total_amount = db.query(func.sum(Transaction.amount)).filter(
-            Transaction.category_id == cat.id
-        ).scalar() or 0.0
-        
-        result.append({
+    """Get category usage statistics - optimized single query."""
+    # Single query with LEFT JOIN and GROUP BY to get all categories with stats
+    categories_with_stats = db.query(
+        Category,
+        func.count(Transaction.id).label('transaction_count'),
+        func.coalesce(func.sum(Transaction.amount), 0).label('total_amount')
+    ).outerjoin(
+        Transaction, Category.id == Transaction.category_id
+    ).group_by(Category.id).order_by(
+        func.count(Transaction.id).desc()
+    ).all()
+
+    return [
+        {
             "id": cat.id,
             "name": cat.name,
             "icon": cat.icon,
@@ -317,10 +317,7 @@ def get_category_usage(db: Session = Depends(get_db)):
             "is_income": cat.is_income,
             "transaction_count": trans_count,
             "total_amount": float(total_amount)
-        })
-    
-    # Sort by transaction count descending
-    result.sort(key=lambda x: x["transaction_count"], reverse=True)
-    
-    return result
+        }
+        for cat, trans_count, total_amount in categories_with_stats
+    ]
 

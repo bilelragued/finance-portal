@@ -19,14 +19,27 @@ if DATABASE_URL.startswith("postgres://"):
 
 # Create engine with appropriate settings
 connect_args = {}
-if DATABASE_URL.startswith("sqlite"):
+is_sqlite = DATABASE_URL.startswith("sqlite")
+if is_sqlite:
     connect_args = {"check_same_thread": False}
+
+# Pool settings - SQLite doesn't support connection pooling
+pool_settings = {
+    "pool_pre_ping": True,  # Verify connections before using
+    "pool_recycle": 300,  # Recycle connections after 5 minutes
+}
+
+# Add connection pool settings for PostgreSQL (not supported by SQLite)
+if not is_sqlite:
+    pool_settings.update({
+        "pool_size": 5,  # Maintain 5 connections in pool
+        "max_overflow": 10,  # Allow up to 10 extra temporary connections
+    })
 
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True,  # Verify connections before using
-    pool_recycle=300,  # Recycle connections after 5 minutes
+    **pool_settings
 )
 
 # Session factory

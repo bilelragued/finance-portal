@@ -85,9 +85,9 @@ class Transaction(Base):
     card_number_last4 = Column(String(4))  # Last 4 digits of card if present
     
     # Classification and categorization
-    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
-    classification = Column(SQLEnum(TransactionClassification), default=TransactionClassification.UNCLASSIFIED)
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False, index=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True, index=True)
+    classification = Column(SQLEnum(TransactionClassification), default=TransactionClassification.UNCLASSIFIED, index=True)
     
     # User overrides and tracking
     user_notes = Column(Text)

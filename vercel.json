@@ -20,7 +20,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "memory": 1024,
+        "memory": 2048,
         "maxDuration": 30
       }
     }
@@ -33,6 +33,20 @@
     {
       "src": "/api/simple",
       "dest": "/api/simple.py"
+    },
+    {
+      "src": "/api/categories/?$",
+      "dest": "/api/index.py",
+      "headers": {
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=600"
+      }
+    },
+    {
+      "src": "/api/accounts/?$",
+      "dest": "/api/index.py",
+      "headers": {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=120"
+      }
     },
     {
       "src": "/api/(.*)",

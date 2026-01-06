@@ -9,7 +9,7 @@ import {
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import { accountsApi, transactionsApi, categoriesApi } from '../services/api';
+import { accountsApi, transactionsApi } from '../services/api';
 import clsx from 'clsx';
 import CategorizationStatsBar from '../components/CategorizationStatsBar';
 
@@ -72,13 +72,6 @@ function Dashboard() {
       ]);
       setAccounts(accountsRes.data);
       setStats(statsRes.data);
-      
-      // Seed categories if needed (first time setup)
-      try {
-        await categoriesApi.seed();
-      } catch (e) {
-        // Ignore if already seeded
-      }
     } catch (err) {
       setError('Failed to load dashboard data');
       console.error(err);
