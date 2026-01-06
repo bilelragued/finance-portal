@@ -1,7 +1,7 @@
 """Transaction management endpoints."""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, case
 from typing import List, Optional
 from datetime import date
 
@@ -338,8 +338,6 @@ def get_transaction_stats(
     db: Session = Depends(get_db)
 ):
     """Get transaction statistics - optimized single query."""
-    from sqlalchemy import case
-
     # Build base filter conditions
     filters = []
     if account_id:
