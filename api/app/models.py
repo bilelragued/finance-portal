@@ -51,6 +51,8 @@ class Category(Base):
     color = Column(String(20))  # Hex color for charts
     parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     is_income = Column(Boolean, default=False)  # True for income categories
+    nl_description = Column(Text, nullable=True)  # Natural language description for AI matching
+    nl_keywords = Column(Text, nullable=True)  # Additional keywords for matching
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

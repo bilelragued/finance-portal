@@ -80,6 +80,8 @@ def list_categories(
             color=cat.color,
             parent_id=cat.parent_id,
             is_income=cat.is_income,
+            nl_description=cat.nl_description,
+            nl_keywords=cat.nl_keywords,
             created_at=cat.created_at
         )
         for cat in categories
@@ -108,7 +110,9 @@ def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
         icon=category.icon,
         color=category.color,
         parent_id=category.parent_id,
-        is_income=category.is_income
+        is_income=category.is_income,
+        nl_description=category.nl_description,
+        nl_keywords=category.nl_keywords
     )
     
     db.add(db_category)
@@ -122,6 +126,8 @@ def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
         color=db_category.color,
         parent_id=db_category.parent_id,
         is_income=db_category.is_income,
+        nl_description=db_category.nl_description,
+        nl_keywords=db_category.nl_keywords,
         created_at=db_category.created_at
     )
 
@@ -130,10 +136,10 @@ def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
 def get_category(category_id: int, db: Session = Depends(get_db)):
     """Get a category by ID."""
     category = db.query(Category).filter(Category.id == category_id).first()
-    
+
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-    
+
     return CategoryResponse(
         id=category.id,
         name=category.name,
@@ -141,6 +147,8 @@ def get_category(category_id: int, db: Session = Depends(get_db)):
         color=category.color,
         parent_id=category.parent_id,
         is_income=category.is_income,
+        nl_description=category.nl_description,
+        nl_keywords=category.nl_keywords,
         created_at=category.created_at
     )
 
@@ -171,10 +179,12 @@ def update_category(
     category.color = update.color
     category.parent_id = update.parent_id
     category.is_income = update.is_income
-    
+    category.nl_description = update.nl_description
+    category.nl_keywords = update.nl_keywords
+
     db.commit()
     db.refresh(category)
-    
+
     return CategoryResponse(
         id=category.id,
         name=category.name,
@@ -182,6 +192,8 @@ def update_category(
         color=category.color,
         parent_id=category.parent_id,
         is_income=category.is_income,
+        nl_description=category.nl_description,
+        nl_keywords=category.nl_keywords,
         created_at=category.created_at
     )
 

@@ -52,6 +52,8 @@ class CategoryBase(BaseModel):
     color: Optional[str] = None
     parent_id: Optional[int] = None
     is_income: bool = False
+    nl_description: Optional[str] = None
+    nl_keywords: Optional[str] = None
 
 
 class CategoryCreate(CategoryBase):

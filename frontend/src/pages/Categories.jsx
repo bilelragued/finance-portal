@@ -46,7 +46,9 @@ function Categories() {
     name: '',
     icon: '📦',
     color: '#BDC3C7',
-    is_income: false
+    is_income: false,
+    nl_description: '',
+    nl_keywords: ''
   });
 
   useEffect(() => {
@@ -67,7 +69,7 @@ function Categories() {
   };
 
   const handleCreate = () => {
-    setForm({ name: '', icon: '📦', color: '#BDC3C7', is_income: false });
+    setForm({ name: '', icon: '📦', color: '#BDC3C7', is_income: false, nl_description: '', nl_keywords: '' });
     setModalMode('create');
     setShowModal(true);
   };
@@ -78,7 +80,9 @@ function Categories() {
       name: category.name,
       icon: category.icon,
       color: category.color,
-      is_income: category.is_income
+      is_income: category.is_income,
+      nl_description: category.nl_description || '',
+      nl_keywords: category.nl_keywords || ''
     });
     setModalMode('edit');
     setShowModal(true);
@@ -373,6 +377,47 @@ function Categories() {
                     >
                       Income
                     </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-700">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm font-medium text-slate-300">🤖 AI Classification</span>
+                    <span className="text-xs text-slate-500">(Optional)</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">
+                        Natural Language Description
+                      </label>
+                      <textarea
+                        value={form.nl_description}
+                        onChange={(e) => setForm({ ...form, nl_description: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500 resize-none"
+                        placeholder="e.g., Coffee shops, cafes, espresso bars, and other coffee-related purchases"
+                        rows={3}
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Describe what transactions belong in this category. Used by AI to automatically categorize.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-2">
+                        Keywords (comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={form.nl_keywords}
+                        onChange={(e) => setForm({ ...form, nl_keywords: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                        placeholder="e.g., starbucks, coffee, cafe, espresso"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Additional merchant names or keywords to help with matching.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

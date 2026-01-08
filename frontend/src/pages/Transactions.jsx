@@ -20,7 +20,7 @@ import {
   RotateCcw,
   Zap
 } from 'lucide-react';
-import { transactionsApi, accountsApi, categoriesApi, categorizationApi } from '../services/api';
+import { transactionsApi, accountsApi, categoriesApi, categorizationApi, nlpApi } from '../services/api';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import CategorizationStatsBar from '../components/CategorizationStatsBar';
@@ -51,6 +51,12 @@ function Transactions() {
     date_to: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+
+  // NL Search
+  const [nlSearchMode, setNlSearchMode] = useState(false);
+  const [nlQuery, setNlQuery] = useState('');
+  const [nlExplanation, setNlExplanation] = useState('');
+  const [nlSearchLoading, setNlSearchLoading] = useState(false);
 
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -97,7 +103,7 @@ function Transactions() {
         ...(filters.date_from && { date_from: filters.date_from }),
         ...(filters.date_to && { date_to: filters.date_to }),
       };
-      
+
       const response = await transactionsApi.list(params);
       setTransactions(response.data.transactions);
       setTotalPages(response.data.total_pages);
@@ -107,6 +113,62 @@ function Transactions() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNlSearch = async () => {
+    if (!nlQuery.trim()) {
+      setError('Please enter a search query');
+      return;
+    }
+
+    setNlSearchLoading(true);
+    setLoading(true);
+    setError(null);
+    setNlExplanation('');
+
+    try {
+      const params = {
+        page,
+        page_size: pageSize,
+      };
+
+      const response = await nlpApi.search(nlQuery, params);
+      setTransactions(response.data.transactions);
+      setTotalPages(response.data.total_pages);
+      setTotal(response.data.total);
+
+      // Show explanation if available
+      if (response.data.explanation) {
+        setNlExplanation(response.data.explanation);
+      }
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to search with natural language');
+      console.error(err);
+    } finally {
+      setNlSearchLoading(false);
+      setLoading(false);
+    }
+  };
+
+  const toggleNlSearch = () => {
+    setNlSearchMode(!nlSearchMode);
+    setNlQuery('');
+    setNlExplanation('');
+    if (!nlSearchMode) {
+      // Switching to NL mode, clear regular filters
+      setFilters({
+        search: '',
+        account_id: '',
+        classification: '',
+        category_id: '',
+        is_reviewed: '',
+        date_from: '',
+        date_to: '',
+      });
+    } else {
+      // Switching back to regular mode, reload transactions
+      loadTransactions();
     }
   };
 
@@ -367,33 +429,93 @@ function Transactions() {
         <div className="flex items-center gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search transactions..."
-              value={filters.search}
-              onChange={(e) => {
-                setFilters(prev => ({ ...prev, search: e.target.value }));
-                setPage(1);
-              }}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500"
-            />
+            {nlSearchMode ? (
+              <>
+                <Bot className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-500" />
+                <input
+                  type="text"
+                  placeholder="Ask in natural language... (e.g., 'show me all coffee purchases over $5 last month')"
+                  value={nlQuery}
+                  onChange={(e) => setNlQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') handleNlSearch();
+                  }}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-purple-50 border border-purple-200 text-slate-800 placeholder-purple-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                />
+              </>
+            ) : (
+              <>
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search transactions..."
+                  value={filters.search}
+                  onChange={(e) => {
+                    setFilters(prev => ({ ...prev, search: e.target.value }));
+                    setPage(1);
+                  }}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500"
+                />
+              </>
+            )}
           </div>
 
-          {/* Filter toggle */}
+          {/* NL Search Toggle & Button */}
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={toggleNlSearch}
             className={clsx(
               'flex items-center gap-2 px-4 py-3 rounded-xl border transition-all',
-              showFilters
-                ? 'border-ocean-500 bg-ocean-50 text-ocean-600'
+              nlSearchMode
+                ? 'border-purple-500 bg-purple-50 text-purple-600'
                 : 'border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             )}
+            title={nlSearchMode ? 'Switch to regular search' : 'Use AI search'}
           >
-            <Filter className="w-5 h-5" />
-            Filters
+            <Bot className="w-5 h-5" />
+            AI
           </button>
+
+          {/* Search Button (for NL mode) */}
+          {nlSearchMode && (
+            <button
+              onClick={handleNlSearch}
+              disabled={nlSearchLoading || !nlQuery.trim()}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium hover:shadow-lg hover:shadow-purple-500/30 transition-all disabled:opacity-50"
+            >
+              {nlSearchLoading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
+              Search
+            </button>
+          )}
+
+          {/* Filter toggle */}
+          {!nlSearchMode && (
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={clsx(
+                'flex items-center gap-2 px-4 py-3 rounded-xl border transition-all',
+                showFilters
+                  ? 'border-ocean-500 bg-ocean-50 text-ocean-600'
+                  : 'border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+              )}
+            >
+              <Filter className="w-5 h-5" />
+              Filters
+            </button>
+          )}
         </div>
+
+        {/* NL Explanation */}
+        {nlExplanation && (
+          <div className="mt-4 p-3 rounded-xl bg-purple-50 border border-purple-200">
+            <p className="text-sm text-purple-700">
+              <strong>Understanding:</strong> {nlExplanation}
+            </p>
+          </div>
+        )}
 
         {/* Filter Panel */}
         {showFilters && (

@@ -5,7 +5,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db
-from app.routers import accounts, transactions, upload, categories, categorization, reports
+from app.routers import accounts, transactions, upload, categories, categorization, reports, nlp
 from app.auth import verify_credentials
 
 
@@ -55,6 +55,7 @@ app.include_router(upload.router, prefix="/api")
 app.include_router(categories.router, prefix="/api")
 app.include_router(categorization.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
+app.include_router(nlp.router, prefix="/api")
 
 
 @app.get("/")

@@ -184,6 +184,30 @@ export const reportsApi = {
   getSummary: (params = {}) => api.get('/reports/summary', { params }),
 };
 
+// NLP API - Natural Language Processing for categorization and search
+export const nlpApi = {
+  // Check if NLP features are available
+  status: () => api.get('/nlp/status'),
+
+  // Parse natural language query into structured filters
+  parseQuery: (query) => api.post('/nlp/parse-query', { query }),
+
+  // Search transactions using natural language
+  search: (query, params = {}) => api.post('/nlp/search', { query }, { params }),
+
+  // Match single transaction to best category
+  matchTransaction: (transactionId, minConfidence = 0.7) =>
+    api.post('/nlp/match-transaction', { transaction_id: transactionId, min_confidence: minConfidence }),
+
+  // Categorize multiple transactions using NL descriptions
+  categorize: (transactionIds = null, minConfidence = 0.7, apply = false) =>
+    api.post('/nlp/categorize', {
+      transaction_ids: transactionIds,
+      min_confidence: minConfidence,
+      apply
+    }),
+};
+
 // Health check
 export const healthCheck = () => api.get('/health');
 
