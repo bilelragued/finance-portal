@@ -67,16 +67,16 @@ function CategorizationStatsBar({
 
   if (loading) {
     return (
-      <div className={clsx("glass rounded-xl p-4 animate-pulse", className)}>
-        <div className="h-6 bg-slate-700 rounded w-1/2"></div>
+      <div className={clsx("bg-white rounded-xl p-4 shadow-sm border border-slate-100 animate-pulse", className)}>
+        <div className="h-6 bg-slate-200 rounded w-1/2"></div>
       </div>
     );
   }
 
   if (!stats) return null;
 
-  const percentConfirmed = stats.total > 0 
-    ? Math.round((stats.user_confirmed / stats.total) * 100) 
+  const percentConfirmed = stats.total > 0
+    ? Math.round((stats.user_confirmed / stats.total) * 100)
     : 0;
 
   if (compact) {
@@ -85,18 +85,18 @@ function CategorizationStatsBar({
         {stats.needs_attention > 0 && (
           <button
             onClick={onNeedsAttentionClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition-all"
           >
             <AlertCircle className="w-4 h-4" />
             <span>{stats.needs_attention} need attention</span>
           </button>
         )}
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <Lock className="w-4 h-4 text-emerald-400" />
+        <div className="flex items-center gap-1.5 text-slate-500">
+          <Lock className="w-4 h-4 text-emerald-600" />
           <span>{stats.user_confirmed} confirmed</span>
         </div>
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <Bot className="w-4 h-4 text-blue-400" />
+        <div className="flex items-center gap-1.5 text-slate-500">
+          <Bot className="w-4 h-4 text-blue-600" />
           <span>{stats.auto_categorized} auto</span>
         </div>
       </div>
@@ -104,68 +104,68 @@ function CategorizationStatsBar({
   }
 
   return (
-    <div className={clsx("glass rounded-xl p-4", className)}>
+    <div className={clsx("bg-white rounded-xl p-4 shadow-sm border border-slate-100", className)}>
       {/* Main stats row */}
       <div className="flex flex-wrap items-center gap-6">
         {/* Needs Attention */}
         {stats.needs_attention > 0 ? (
           <button
             onClick={onNeedsAttentionClick}
-            className="flex items-center gap-3 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 transition-all group"
+            className="flex items-center gap-3 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 transition-all group"
           >
-            <div className="p-2 rounded-lg bg-amber-500/20">
-              <AlertCircle className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-lg bg-amber-100">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
             </div>
             <div className="text-left">
-              <p className="text-2xl font-bold text-amber-400">{stats.needs_attention}</p>
-              <p className="text-xs text-slate-400 group-hover:text-slate-300">Need Attention</p>
+              <p className="text-2xl font-bold text-amber-600">{stats.needs_attention}</p>
+              <p className="text-xs text-slate-500 group-hover:text-slate-600">Need Attention</p>
             </div>
           </button>
         ) : (
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-            <div className="p-2 rounded-lg bg-emerald-500/20">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200">
+            <div className="p-2 rounded-lg bg-emerald-100">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-emerald-400">All Categorized!</p>
-              <p className="text-xs text-slate-400">No transactions need attention</p>
+              <p className="text-sm font-medium text-emerald-600">All Categorized!</p>
+              <p className="text-xs text-slate-500">No transactions need attention</p>
             </div>
           </div>
         )}
 
         {/* Divider */}
-        <div className="h-12 w-px bg-slate-700/50"></div>
+        <div className="h-12 w-px bg-slate-200"></div>
 
         {/* User Confirmed */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10">
-            <Lock className="w-5 h-5 text-emerald-400" />
+          <div className="p-2 rounded-lg bg-emerald-50">
+            <Lock className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <p className="text-xl font-semibold text-slate-100">{stats.user_confirmed}</p>
-            <p className="text-xs text-slate-400">Confirmed ({percentConfirmed}%)</p>
+            <p className="text-xl font-semibold text-slate-800">{stats.user_confirmed}</p>
+            <p className="text-xs text-slate-500">Confirmed ({percentConfirmed}%)</p>
           </div>
         </div>
 
         {/* Auto Categorized */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/10">
-            <Bot className="w-5 h-5 text-blue-400" />
+          <div className="p-2 rounded-lg bg-blue-50">
+            <Bot className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-xl font-semibold text-slate-100">{stats.auto_categorized}</p>
-            <p className="text-xs text-slate-400">Auto-categorized</p>
+            <p className="text-xl font-semibold text-slate-800">{stats.auto_categorized}</p>
+            <p className="text-xs text-slate-500">Auto-categorized</p>
           </div>
         </div>
 
         {/* Uncategorized */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-slate-500/10">
-            <AlertCircle className="w-5 h-5 text-slate-400" />
+          <div className="p-2 rounded-lg bg-slate-100">
+            <AlertCircle className="w-5 h-5 text-slate-500" />
           </div>
           <div>
-            <p className="text-xl font-semibold text-slate-100">{stats.uncategorized}</p>
-            <p className="text-xs text-slate-400">Uncategorized</p>
+            <p className="text-xl font-semibold text-slate-800">{stats.uncategorized}</p>
+            <p className="text-xs text-slate-500">Uncategorized</p>
           </div>
         </div>
 
@@ -174,7 +174,7 @@ function CategorizationStatsBar({
           <button
             onClick={handleTrainML}
             disabled={mlTraining}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 disabled:opacity-50 transition-all text-sm"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-50 transition-all text-sm border border-purple-200"
             title="Train ML model on your confirmed categorizations"
           >
             {mlTraining ? (
@@ -184,12 +184,12 @@ function CategorizationStatsBar({
             )}
             Train ML
           </button>
-          
+
           {stats.uncategorized > 0 && (
             <button
               onClick={handleAutoCategorizeMl}
               disabled={mlTraining}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-500/20 text-ocean-400 hover:bg-ocean-500/30 disabled:opacity-50 transition-all text-sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-ocean-50 text-ocean-700 hover:bg-ocean-100 disabled:opacity-50 transition-all text-sm border border-ocean-200"
               title="Auto-categorize uncategorized transactions with ML"
             >
               <Bot className="w-4 h-4" />
@@ -203,7 +203,7 @@ function CategorizationStatsBar({
       {mlResult && (
         <div className={clsx(
           "mt-3 px-4 py-2 rounded-lg text-sm",
-          mlResult.error ? "bg-coral-500/10 text-coral-400" : "bg-emerald-500/10 text-emerald-400"
+          mlResult.error ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
         )}>
           {mlResult.error ? (
             mlResult.error

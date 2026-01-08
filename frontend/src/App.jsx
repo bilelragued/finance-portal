@@ -38,18 +38,18 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 text-slate-800">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 glass border-r border-slate-700/50 z-50">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 shadow-sm z-50">
         {/* Logo */}
-        <div className="p-6 border-b border-slate-700/50">
+        <div className="p-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ocean-400 to-ocean-600 flex items-center justify-center shadow-lg shadow-ocean-500/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-ocean-500 to-ocean-700 flex items-center justify-center shadow-lg shadow-ocean-500/20">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="font-display font-bold text-lg gradient-text">Finance Portal</h1>
-              <p className="text-xs text-slate-500">Personal Accounts</p>
+              <p className="text-xs text-slate-400">Personal Accounts</p>
             </div>
           </div>
         </div>
@@ -57,24 +57,24 @@ function App() {
         {/* Navigation */}
         <nav className="p-4 space-y-1">
           {navItems.map(({ path, icon: Icon, label }) => {
-            const isActive = location.pathname === path || 
+            const isActive = location.pathname === path ||
               (path !== '/' && location.pathname.startsWith(path));
-            
+
             return (
               <NavLink
                 key={path}
                 to={path}
                 className={clsx(
                   'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200',
-                  isActive 
-                    ? 'bg-ocean-500/20 text-ocean-400 shadow-lg shadow-ocean-500/10' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  isActive
+                    ? 'bg-ocean-50 text-ocean-700 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                 )}
               >
-                <Icon className={clsx('w-5 h-5', isActive && 'text-ocean-400')} />
+                <Icon className={clsx('w-5 h-5', isActive && 'text-ocean-600')} />
                 <span>{label}</span>
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-ocean-400" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-ocean-500" />
                 )}
               </NavLink>
             );
@@ -82,8 +82,8 @@ function App() {
         </nav>
 
         {/* Bottom section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50">
-          <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100">
+          <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all">
             <Settings className="w-5 h-5" />
             <span>Settings</span>
           </button>

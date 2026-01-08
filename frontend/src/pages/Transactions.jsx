@@ -239,25 +239,25 @@ function Transactions() {
     switch (source) {
       case 'user':
         return (
-          <span className="flex items-center gap-1 text-xs text-emerald-400" title="User confirmed">
+          <span className="flex items-center gap-1 text-xs text-emerald-600" title="User confirmed">
             <Lock className="w-3 h-3" />
           </span>
         );
       case 'rule':
         return (
-          <span className="flex items-center gap-1 text-xs text-blue-400" title="Applied by rule">
+          <span className="flex items-center gap-1 text-xs text-blue-600" title="Applied by rule">
             <Zap className="w-3 h-3" />
           </span>
         );
       case 'ml':
         return (
-          <span className="flex items-center gap-1 text-xs text-purple-400" title="ML prediction">
+          <span className="flex items-center gap-1 text-xs text-purple-600" title="ML prediction">
             <Bot className="w-3 h-3" />
           </span>
         );
       case 'llm':
         return (
-          <span className="flex items-center gap-1 text-xs text-amber-400" title="AI suggestion">
+          <span className="flex items-center gap-1 text-xs text-amber-600" title="AI suggestion">
             <Zap className="w-3 h-3" />
           </span>
         );
@@ -305,15 +305,15 @@ function Transactions() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold text-slate-100">Transactions</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-display font-bold text-slate-800">Transactions</h1>
+          <p className="text-slate-500 mt-1">
             {total.toLocaleString()} transactions total
           </p>
         </div>
         <button
           onClick={loadTransactions}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 shadow-sm transition-all disabled:opacity-50"
         >
           <RefreshCw className={clsx('w-4 h-4', loading && 'animate-spin')} />
           Refresh
@@ -321,7 +321,7 @@ function Transactions() {
       </div>
 
       {/* Categorization Stats Bar */}
-      <CategorizationStatsBar 
+      <CategorizationStatsBar
         onNeedsAttentionClick={() => {
           setFilters(prev => ({ ...prev, category_id: 'null' }));
           setPage(1);
@@ -330,30 +330,30 @@ function Transactions() {
 
       {/* Bulk Action Bar */}
       {selectedIds.size > 0 && (
-        <div className="glass rounded-2xl p-4 flex items-center justify-between animate-slide-up">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between animate-slide-up">
           <div className="flex items-center gap-4">
-            <span className="text-ocean-400 font-medium">
+            <span className="text-ocean-600 font-medium">
               {selectedIds.size} selected
             </span>
             <button
               onClick={clearSelection}
-              className="text-slate-400 hover:text-slate-300 text-sm"
+              className="text-slate-500 hover:text-slate-700 text-sm"
             >
               Clear
             </button>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={() => openBulkModal('classification')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all"
             >
               <Briefcase className="w-4 h-4" />
               Set Classification
             </button>
             <button
               onClick={() => openBulkModal('category')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-all"
             >
               <Tags className="w-4 h-4" />
               Set Category
@@ -363,7 +363,7 @@ function Transactions() {
       )}
 
       {/* Search and Filters */}
-      <div className="glass rounded-2xl p-4">
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
         <div className="flex items-center gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -376,7 +376,7 @@ function Transactions() {
                 setFilters(prev => ({ ...prev, search: e.target.value }));
                 setPage(1);
               }}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500"
             />
           </div>
 
@@ -385,9 +385,9 @@ function Transactions() {
             onClick={() => setShowFilters(!showFilters)}
             className={clsx(
               'flex items-center gap-2 px-4 py-3 rounded-xl border transition-all',
-              showFilters 
-                ? 'border-ocean-500 bg-ocean-500/10 text-ocean-400' 
-                : 'border-slate-700 text-slate-400 hover:text-slate-300'
+              showFilters
+                ? 'border-ocean-500 bg-ocean-50 text-ocean-600'
+                : 'border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             )}
           >
             <Filter className="w-5 h-5" />
@@ -397,17 +397,17 @@ function Transactions() {
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-4 pt-4 border-t border-slate-700 animate-slide-up">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-4 pt-4 border-t border-slate-100 animate-slide-up">
             {/* Account Filter */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Account</label>
+              <label className="block text-sm text-slate-500 mb-2">Account</label>
               <select
                 value={filters.account_id}
                 onChange={(e) => {
                   setFilters(prev => ({ ...prev, account_id: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               >
                 <option value="">All Accounts</option>
                 {accounts.map(acc => (
@@ -418,14 +418,14 @@ function Transactions() {
 
             {/* Classification Filter */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Classification</label>
+              <label className="block text-sm text-slate-500 mb-2">Classification</label>
               <select
                 value={filters.classification}
                 onChange={(e) => {
                   setFilters(prev => ({ ...prev, classification: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               >
                 <option value="">All</option>
                 <option value="personal">Personal</option>
@@ -436,14 +436,14 @@ function Transactions() {
 
             {/* Category Filter */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Category</label>
+              <label className="block text-sm text-slate-500 mb-2">Category</label>
               <select
                 value={filters.category_id}
                 onChange={(e) => {
                   setFilters(prev => ({ ...prev, category_id: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               >
                 <option value="">All Categories</option>
                 <option value="null">Uncategorized</option>
@@ -455,14 +455,14 @@ function Transactions() {
 
             {/* Review Status */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Review Status</label>
+              <label className="block text-sm text-slate-500 mb-2">Review Status</label>
               <select
                 value={filters.is_reviewed}
                 onChange={(e) => {
                   setFilters(prev => ({ ...prev, is_reviewed: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               >
                 <option value="">All</option>
                 <option value="true">Reviewed</option>
@@ -472,7 +472,7 @@ function Transactions() {
 
             {/* Date From */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">From Date</label>
+              <label className="block text-sm text-slate-500 mb-2">From Date</label>
               <input
                 type="date"
                 value={filters.date_from}
@@ -480,13 +480,13 @@ function Transactions() {
                   setFilters(prev => ({ ...prev, date_from: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               />
             </div>
 
             {/* Date To */}
             <div>
-              <label className="block text-sm text-slate-400 mb-2">To Date</label>
+              <label className="block text-sm text-slate-500 mb-2">To Date</label>
               <input
                 type="date"
                 value={filters.date_to}
@@ -494,7 +494,7 @@ function Transactions() {
                   setFilters(prev => ({ ...prev, date_to: e.target.value }));
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 focus:border-ocean-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:border-ocean-500"
               />
             </div>
           </div>
@@ -503,7 +503,7 @@ function Transactions() {
 
       {/* Messages */}
       {error && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-coral-500/10 border border-coral-500/20 text-coral-400">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-600">
           <AlertCircle className="w-5 h-5" />
           {error}
           <button onClick={() => setError(null)} className="ml-auto">
@@ -511,37 +511,37 @@ function Transactions() {
           </button>
         </div>
       )}
-      
+
       {success && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600">
           <CheckCircle2 className="w-5 h-5" />
           {success}
         </div>
       )}
 
       {/* Transactions Table */}
-      <div className="glass rounded-2xl overflow-hidden">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100">
         {loading ? (
           <div className="flex items-center justify-center p-12">
-            <RefreshCw className="w-8 h-8 text-ocean-400 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-ocean-500 animate-spin" />
           </div>
         ) : transactions.length === 0 ? (
           <div className="text-center p-12">
-            <Calendar className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400">No transactions found</p>
+            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">No transactions found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-slate-400 bg-slate-800/50">
+                <tr className="text-left text-sm text-slate-500 bg-slate-50">
                   <th className="px-4 py-4">
                     <button
                       onClick={selectAll}
-                      className="p-1 rounded hover:bg-slate-700"
+                      className="p-1 rounded hover:bg-slate-200"
                     >
                       {selectedIds.size === transactions.length ? (
-                        <CheckSquare className="w-5 h-5 text-ocean-400" />
+                        <CheckSquare className="w-5 h-5 text-ocean-600" />
                       ) : (
                         <Square className="w-5 h-5" />
                       )}
@@ -560,34 +560,34 @@ function Transactions() {
                 {transactions.map((trans, idx) => {
                   const category = getCategoryById(trans.category_id);
                   return (
-                    <tr 
-                      key={trans.id} 
+                    <tr
+                      key={trans.id}
                       className={clsx(
-                        'border-t border-slate-800 transition-all',
-                        selectedIds.has(trans.id) 
-                          ? 'bg-ocean-500/10' 
-                          : 'hover:bg-slate-800/50'
+                        'border-t border-slate-100 transition-all',
+                        selectedIds.has(trans.id)
+                          ? 'bg-ocean-50'
+                          : 'hover:bg-slate-50'
                       )}
                       style={{ animationDelay: `${idx * 20}ms` }}
                     >
                       <td className="px-4 py-4">
                         <button
                           onClick={() => toggleSelect(trans.id)}
-                          className="p-1 rounded hover:bg-slate-700"
+                          className="p-1 rounded hover:bg-slate-200"
                         >
                           {selectedIds.has(trans.id) ? (
-                            <CheckSquare className="w-5 h-5 text-ocean-400" />
+                            <CheckSquare className="w-5 h-5 text-ocean-600" />
                           ) : (
-                            <Square className="w-5 h-5 text-slate-500" />
+                            <Square className="w-5 h-5 text-slate-400" />
                           )}
                         </button>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-slate-300">{formatDate(trans.transaction_date)}</span>
+                        <span className="text-slate-700">{formatDate(trans.transaction_date)}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div>
-                          <p className="text-slate-200 font-medium">
+                          <p className="text-slate-800 font-medium">
                             {trans.code || trans.details || '-'}
                           </p>
                           {trans.code && trans.details && (
@@ -596,12 +596,12 @@ function Transactions() {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-slate-400 text-sm">{trans.transaction_type}</span>
+                        <span className="text-slate-500 text-sm">{trans.transaction_type}</span>
                       </td>
                       <td className="px-4 py-4 text-right">
                         <span className={clsx(
                           'font-mono font-medium',
-                          trans.amount < 0 ? 'text-coral-400' : 'text-emerald-400'
+                          trans.amount < 0 ? 'text-red-600' : 'text-emerald-600'
                         )}>
                           {formatCurrency(trans.amount)}
                         </span>
@@ -611,10 +611,10 @@ function Transactions() {
                           {category ? (
                             <span className="flex items-center gap-2 text-sm">
                               <span>{category.icon}</span>
-                              <span className="text-slate-300">{category.name}</span>
+                              <span className="text-slate-700">{category.name}</span>
                             </span>
                           ) : (
-                            <span className="text-slate-500 text-sm">-</span>
+                            <span className="text-slate-400 text-sm">-</span>
                           )}
                           {getSourceBadge(trans.categorization_source)}
                         </div>
@@ -623,7 +623,7 @@ function Transactions() {
                         <div className="flex items-center gap-2">
                           {getClassificationBadge(trans.classification)}
                           {trans.is_user_confirmed && (
-                            <Lock className="w-3 h-3 text-emerald-400" title="User confirmed - locked" />
+                            <Lock className="w-3 h-3 text-emerald-600" title="User confirmed - locked" />
                           )}
                         </div>
                       </td>
@@ -632,7 +632,7 @@ function Transactions() {
                           {trans.classification !== 'personal' && (
                             <button
                               onClick={() => handleClassificationChange(trans.id, 'personal')}
-                              className="p-2 rounded-lg hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400 transition-all"
+                              className="p-2 rounded-lg hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 transition-all"
                               title="Mark as Personal"
                             >
                               <User className="w-4 h-4" />
@@ -641,7 +641,7 @@ function Transactions() {
                           {trans.classification !== 'business' && (
                             <button
                               onClick={() => handleClassificationChange(trans.id, 'business')}
-                              className="p-2 rounded-lg hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition-all"
+                              className="p-2 rounded-lg hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-all"
                               title="Mark as Business"
                             >
                               <Briefcase className="w-4 h-4" />
@@ -650,7 +650,7 @@ function Transactions() {
                           {trans.is_user_confirmed && (
                             <button
                               onClick={() => handleResetTransaction(trans.id)}
-                              className="p-2 rounded-lg hover:bg-purple-500/20 text-slate-400 hover:text-purple-400 transition-all"
+                              className="p-2 rounded-lg hover:bg-purple-50 text-slate-400 hover:text-purple-600 transition-all"
                               title="Reset for re-categorization"
                             >
                               <RotateCcw className="w-4 h-4" />
@@ -668,9 +668,9 @@ function Transactions() {
 
         {/* Pagination */}
         {total > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-800/30">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50">
             <div className="flex items-center gap-4">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-500">
                 Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, total)} of {total}
               </p>
               <div className="flex items-center gap-2">
@@ -681,7 +681,7 @@ function Transactions() {
                     setPageSize(Number(e.target.value));
                     setPage(1); // Reset to first page when changing page size
                   }}
-                  className="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-sm focus:border-ocean-500"
+                  className="px-2 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm focus:border-ocean-500"
                 >
                   {pageSizeOptions.map(size => (
                     <option key={size} value={size}>{size}</option>
@@ -694,17 +694,17 @@ function Transactions() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 rounded-lg hover:bg-slate-200 text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="px-4 py-2 text-sm text-slate-300">
+              <span className="px-4 py-2 text-sm text-slate-700">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 rounded-lg hover:bg-slate-200 text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -715,22 +715,22 @@ function Transactions() {
 
       {/* Bulk Action Modal */}
       {showBulkModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="glass rounded-2xl p-6 w-full max-w-md mx-4 animate-slide-up">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl animate-slide-up">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-slate-100">
+              <h2 className="text-xl font-semibold text-slate-800">
                 {bulkAction === 'classification' ? 'Set Classification' : 'Set Category'}
               </h2>
               <button
                 onClick={() => setShowBulkModal(false)}
-                className="p-2 rounded-lg hover:bg-slate-700 text-slate-400"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-slate-400 mb-4">
-              Apply to <strong className="text-ocean-400">{selectedIds.size}</strong> selected transactions
+            <p className="text-slate-500 mb-4">
+              Apply to <strong className="text-ocean-600">{selectedIds.size}</strong> selected transactions
             </p>
 
             {bulkAction === 'classification' && (
@@ -740,14 +740,14 @@ function Transactions() {
                   className={clsx(
                     'w-full flex items-center gap-3 p-4 rounded-xl border transition-all',
                     bulkValue === 'personal'
-                      ? 'border-emerald-500 bg-emerald-500/10'
-                      : 'border-slate-700 hover:border-slate-600'
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   )}
                 >
-                  <User className="w-5 h-5 text-emerald-400" />
+                  <User className="w-5 h-5 text-emerald-600" />
                   <div className="text-left">
-                    <p className="font-medium text-slate-100">Personal</p>
-                    <p className="text-sm text-slate-400">Track as personal expense</p>
+                    <p className="font-medium text-slate-800">Personal</p>
+                    <p className="text-sm text-slate-500">Track as personal expense</p>
                   </div>
                 </button>
                 <button
@@ -755,14 +755,14 @@ function Transactions() {
                   className={clsx(
                     'w-full flex items-center gap-3 p-4 rounded-xl border transition-all',
                     bulkValue === 'business'
-                      ? 'border-amber-500 bg-amber-500/10'
-                      : 'border-slate-700 hover:border-slate-600'
+                      ? 'border-amber-500 bg-amber-50'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   )}
                 >
-                  <Briefcase className="w-5 h-5 text-amber-400" />
+                  <Briefcase className="w-5 h-5 text-amber-600" />
                   <div className="text-left">
-                    <p className="font-medium text-slate-100">Business</p>
-                    <p className="text-sm text-slate-400">Ignore for personal tracking</p>
+                    <p className="font-medium text-slate-800">Business</p>
+                    <p className="text-sm text-slate-500">Ignore for personal tracking</p>
                   </div>
                 </button>
               </div>
@@ -778,14 +778,14 @@ function Transactions() {
                     placeholder="Search categories..."
                     value={categorySearch}
                     onChange={(e) => setCategorySearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                     autoFocus
                   />
                 </div>
 
                 {/* Filtered Categories */}
                 <div className="max-h-64 overflow-y-auto space-y-4">
-                  {expenseCategories.filter(cat => 
+                  {expenseCategories.filter(cat =>
                     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
                   ).length > 0 && (
                     <div>
@@ -800,8 +800,8 @@ function Transactions() {
                               className={clsx(
                                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all',
                                 bulkValue === cat.id.toString()
-                                  ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500'
-                                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                  ? 'bg-purple-100 text-purple-700 ring-1 ring-purple-500'
+                                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                               )}
                             >
                               <span>{cat.icon}</span>
@@ -811,8 +811,8 @@ function Transactions() {
                       </div>
                     </div>
                   )}
-                  
-                  {incomeCategories.filter(cat => 
+
+                  {incomeCategories.filter(cat =>
                     cat.name.toLowerCase().includes(categorySearch.toLowerCase())
                   ).length > 0 && (
                     <div>
@@ -827,8 +827,8 @@ function Transactions() {
                               className={clsx(
                                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all',
                                 bulkValue === cat.id.toString()
-                                  ? 'bg-purple-500/20 text-purple-400 ring-1 ring-purple-500'
-                                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                  ? 'bg-purple-100 text-purple-700 ring-1 ring-purple-500'
+                                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                               )}
                             >
                               <span>{cat.icon}</span>
@@ -840,7 +840,7 @@ function Transactions() {
                   )}
 
                   {/* No results message */}
-                  {categorySearch && 
+                  {categorySearch &&
                    expenseCategories.filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 &&
                    incomeCategories.filter(cat => cat.name.toLowerCase().includes(categorySearch.toLowerCase())).length === 0 && (
                     <p className="text-center text-slate-500 py-4">
@@ -855,7 +855,7 @@ function Transactions() {
             <div className="flex items-center justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowBulkModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>

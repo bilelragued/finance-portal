@@ -15,20 +15,20 @@ import CategorizationStatsBar from '../components/CategorizationStatsBar';
 
 function StatCard({ title, value, subtitle, icon: Icon, trend, color = 'ocean' }) {
   const colorClasses = {
-    ocean: 'from-ocean-500/20 to-ocean-600/20 text-ocean-400',
-    emerald: 'from-emerald-500/20 to-emerald-600/20 text-emerald-400',
-    coral: 'from-coral-500/20 to-coral-600/20 text-coral-400',
-    amber: 'from-amber-500/20 to-amber-600/20 text-amber-400',
+    ocean: 'from-ocean-50 to-ocean-100 text-ocean-600',
+    emerald: 'from-emerald-50 to-emerald-100 text-emerald-600',
+    coral: 'from-red-50 to-red-100 text-red-600',
+    amber: 'from-amber-50 to-amber-100 text-amber-600',
   };
 
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-fade-in">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-slate-400 text-sm font-medium">{title}</p>
-          <p className="text-2xl font-display font-bold mt-1 text-slate-100">{value}</p>
+          <p className="text-slate-500 text-sm font-medium">{title}</p>
+          <p className="text-2xl font-display font-bold mt-1 text-slate-800">{value}</p>
           {subtitle && (
-            <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
+            <p className="text-sm text-slate-400 mt-1">{subtitle}</p>
           )}
         </div>
         <div className={clsx(
@@ -41,7 +41,7 @@ function StatCard({ title, value, subtitle, icon: Icon, trend, color = 'ocean' }
       {trend && (
         <div className={clsx(
           'flex items-center gap-1 mt-4 text-sm font-medium',
-          trend > 0 ? 'text-emerald-400' : 'text-coral-400'
+          trend > 0 ? 'text-emerald-600' : 'text-red-600'
         )}>
           {trend > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           <span>{Math.abs(trend)}% from last month</span>
@@ -92,7 +92,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 text-ocean-400 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-ocean-500 animate-spin" />
       </div>
     );
   }
@@ -104,12 +104,12 @@ function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold text-slate-100">Dashboard</h1>
-          <p className="text-slate-400 mt-1">Overview of your personal finances</p>
+          <h1 className="text-3xl font-display font-bold text-slate-800">Dashboard</h1>
+          <p className="text-slate-500 mt-1">Overview of your personal finances</p>
         </div>
         <button
           onClick={loadData}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 shadow-sm transition-all"
         >
           <RefreshCw className="w-4 h-4" />
           Refresh
@@ -118,7 +118,7 @@ function Dashboard() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-coral-500/10 border border-coral-500/20 text-coral-400">
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-600">
           <AlertCircle className="w-5 h-5" />
           {error}
         </div>
@@ -126,26 +126,26 @@ function Dashboard() {
 
       {/* Categorization Stats Bar */}
       {hasData && (
-        <CategorizationStatsBar 
+        <CategorizationStatsBar
           onNeedsAttentionClick={() => navigate('/transactions?category_id=null')}
         />
       )}
 
       {/* Empty state */}
       {!hasData && !error && (
-        <div className="glass rounded-2xl p-12 text-center animate-fade-in">
-          <div className="w-20 h-20 rounded-2xl bg-ocean-500/20 flex items-center justify-center mx-auto mb-6">
-            <Upload className="w-10 h-10 text-ocean-400" />
+        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-slate-100 animate-fade-in">
+          <div className="w-20 h-20 rounded-2xl bg-ocean-50 flex items-center justify-center mx-auto mb-6">
+            <Upload className="w-10 h-10 text-ocean-500" />
           </div>
-          <h2 className="text-xl font-display font-bold text-slate-100 mb-2">
+          <h2 className="text-xl font-display font-bold text-slate-800 mb-2">
             Welcome to Finance Portal
           </h2>
-          <p className="text-slate-400 max-w-md mx-auto mb-6">
+          <p className="text-slate-500 max-w-md mx-auto mb-6">
             Get started by uploading your bank transaction files. We'll help you analyze your spending and track your budget.
           </p>
           <Link
             to="/upload"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-ocean-500 to-ocean-600 text-white font-medium hover:shadow-lg hover:shadow-ocean-500/30 transition-all btn-glow"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-ocean-500 to-ocean-600 text-white font-medium hover:shadow-lg hover:shadow-ocean-500/20 transition-all btn-glow"
           >
             Upload Transactions
             <ArrowRight className="w-4 h-4" />
@@ -185,12 +185,12 @@ function Dashboard() {
           </div>
 
           {/* Accounts List */}
-          <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-slide-up">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-display font-semibold text-slate-100">Accounts</h2>
+              <h2 className="text-xl font-display font-semibold text-slate-800">Accounts</h2>
               <Link
                 to="/accounts"
-                className="text-sm text-ocean-400 hover:text-ocean-300 flex items-center gap-1"
+                className="text-sm text-ocean-600 hover:text-ocean-700 flex items-center gap-1"
               >
                 View all <ArrowRight className="w-4 h-4" />
               </Link>
@@ -200,27 +200,27 @@ function Dashboard() {
               {accounts.map((account, index) => (
                 <div
                   key={account.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 transition-all"
+                  className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-all"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-4">
                     <div className={clsx(
                       'w-10 h-10 rounded-xl flex items-center justify-center text-lg',
-                      account.account_type === 'personal' && 'bg-ocean-500/20',
-                      account.account_type === 'business' && 'bg-amber-500/20',
-                      account.account_type === 'savings' && 'bg-emerald-500/20'
+                      account.account_type === 'personal' && 'bg-ocean-100',
+                      account.account_type === 'business' && 'bg-amber-100',
+                      account.account_type === 'savings' && 'bg-emerald-100'
                     )}>
-                      {account.account_type === 'personal' ? '👤' : 
+                      {account.account_type === 'personal' ? '👤' :
                        account.account_type === 'business' ? '💼' : '🏦'}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-100">{account.name}</p>
+                      <p className="font-medium text-slate-800">{account.name}</p>
                       <p className="text-sm text-slate-500">{account.account_number}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-400">{account.owner}</p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-600">{account.owner}</p>
+                    <p className="text-sm text-slate-400">
                       {account.transaction_count} transactions
                     </p>
                   </div>
@@ -233,35 +233,35 @@ function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link
               to="/upload"
-              className="glass rounded-2xl p-6 hover:bg-slate-800/50 transition-all group"
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:border-ocean-200 hover:shadow-md transition-all group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-ocean-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Upload className="w-6 h-6 text-ocean-400" />
+                <div className="w-12 h-12 rounded-xl bg-ocean-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Upload className="w-6 h-6 text-ocean-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-100">Upload More Data</h3>
-                  <p className="text-sm text-slate-400">Import new bank transactions</p>
+                  <h3 className="font-semibold text-slate-800">Upload More Data</h3>
+                  <p className="text-sm text-slate-500">Import new bank transactions</p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-500 ml-auto group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-slate-400 ml-auto group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
             <Link
               to="/transactions"
-              className="glass rounded-2xl p-6 hover:bg-slate-800/50 transition-all group"
+              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:border-amber-200 hover:shadow-md transition-all group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <AlertCircle className="w-6 h-6 text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <AlertCircle className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-100">Review Transactions</h3>
-                  <p className="text-sm text-slate-400">
+                  <h3 className="font-semibold text-slate-800">Review Transactions</h3>
+                  <p className="text-sm text-slate-500">
                     {stats?.classification?.unclassified || 0} transactions need categorization
                   </p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-slate-500 ml-auto group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 text-slate-400 ml-auto group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>
