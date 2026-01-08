@@ -9,16 +9,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: #94a3b8;
 }
 
 /* Custom focus styles */
@@ -37,20 +37,20 @@
 /* Base styles */
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
   min-height: 100vh;
 }
 
 /* Glass effect */
 .glass {
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -58,17 +58,17 @@ body {
 
 /* Button hover effect */
 .btn-glow:hover {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.25);
 }
 
 /* Table row hover */
 .table-row-hover:hover {
-  background: rgba(14, 165, 233, 0.1);
+  background: rgba(14, 165, 233, 0.08);
 }
 
 /* Animated gradient background */
 .animated-gradient {
-  background: linear-gradient(-45deg, #0f172a, #1e293b, #0c4a6e, #0369a1);
+  background: linear-gradient(-45deg, #f8fafc, #e0f2fe, #f0f9ff, #e2e8f0);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
 }
@@ -81,14 +81,14 @@ body {
 
 /* File drop zone */
 .drop-zone {
-  border: 2px dashed #475569;
+  border: 2px dashed #cbd5e1;
   transition: all 0.3s ease;
 }
 
 .drop-zone:hover,
 .drop-zone.drag-over {
   border-color: #0ea5e9;
-  background: rgba(14, 165, 233, 0.1);
+  background: rgba(14, 165, 233, 0.08);
 }
 
 /* Status badges */
@@ -97,28 +97,28 @@ body {
 }
 
 .badge-success {
-  @apply bg-emerald-500/20 text-emerald-400;
+  @apply bg-emerald-100 text-emerald-700;
 }
 
 .badge-warning {
-  @apply bg-amber-500/20 text-amber-400;
+  @apply bg-amber-100 text-amber-700;
 }
 
 .badge-danger {
-  @apply bg-coral-500/20 text-coral-400;
+  @apply bg-red-100 text-red-700;
 }
 
 .badge-info {
-  @apply bg-ocean-500/20 text-ocean-400;
+  @apply bg-ocean-100 text-ocean-700;
 }
 
 /* Amount styling */
 .amount-positive {
-  @apply text-emerald-400 font-mono;
+  @apply text-emerald-600 font-mono;
 }
 
 .amount-negative {
-  @apply text-coral-400 font-mono;
+  @apply text-red-600 font-mono;
 }
 
 
